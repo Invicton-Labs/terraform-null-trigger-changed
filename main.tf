@@ -13,10 +13,14 @@ resource "random_uuid" "module_id" {}
 
 // Track the last set of triggers
 resource "null_resource" "keeper" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers = {
     "___CONDITIONAL_TRIGGER_module_id" = random_uuid.module_id.id
     trigger                            = local.trigger_json
+    // This is a way to force the re-create to wait until other (optional) resources or data sources have finished
+    depends = var.depends == null ? "" : ""
+  }
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
